@@ -1,4 +1,5 @@
 //jshint esversion:6
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -14,7 +15,9 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "public/views"));
 
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 app.use(express.static("public"));
 
 mongoose.connect("mongodb://localhost:27017/userDB", {
@@ -51,8 +54,10 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const secret = "Thisismysecretkey";
-userSchema.plugin(encrypt, { secret: secret, encryptedFields: ["password"] });
+userSchema.plugin(encrypt, {
+  secret: process.env.SECRET,
+  encryptedFields: ["password"]
+});
 
 const User = mongoose.model("user", userSchema);
 
@@ -76,7 +81,9 @@ app.post("/register", function (req, res) {
     password: userPassword,
   });
 
-  User.findOne({ email: userEmail }, function (err, doc) {
+  User.findOne({
+    email: userEmail
+  }, function (err, doc) {
     if (!err) {
       if (!doc || doc.length == 0) {
         newUser.save();
@@ -95,7 +102,9 @@ app.post("/login", function (req, res) {
   const userName = String(req.body.username).replace(" ", "");
   const password = req.body.password;
 
-  User.findOne({ email: userName }, function (err, doc) {
+  User.findOne({
+    email: userName
+  }, function (err, doc) {
     if (!err) {
       if (doc) {
         if (doc.password === password) {
